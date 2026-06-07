@@ -588,7 +588,7 @@ async function renderRanking(){
 /* ============ Render: Admin ============ */
 async function renderAdmin(){
   const c=$('content'); c.innerHTML='';
-  if(!adminUnlocked){ renderPinGate(c); return; }
+  if(!adminUnlocked){ await renderPinGate(c); return; }
 
   const sub=document.createElement('div');sub.className='subtabs';
   sub.innerHTML=`
@@ -895,7 +895,9 @@ async function addMatch(){
   toast('Jogo adicionado'); renderAdmin();
 }
 
-function renderPinGate(c){
+async function renderPinGate(c){
+  // relê a senha do organizador direto do banco (evita usar CONFIG desatualizado no celular)
+  try{ const cf=await store.get('bolao:config'); if(cf&&cf.value) CONFIG=JSON.parse(cf.value); }catch(e){}
   const setup = !CONFIG.pin;
   const box=document.createElement('div');box.className='pinwrap';
   box.innerHTML=`
@@ -907,7 +909,9 @@ function renderPinGate(c){
   $('pinBtn').onclick=async()=>{
     const v=$('pinInput').value.trim();
     if(!v){toast('Digite a senha');return;}
-    if(setup){ CONFIG.pin=v; await store.set('bolao:config',JSON.stringify(CONFIG)); adminUnlocked=true; toast('Senha criada'); renderAdmin(); }
+    // confere de novo no banco no momento de entrar, para não recriar senha por engano
+    try{ const cf=await store.get('bolao:config'); if(cf&&cf.value) CONFIG=JSON.parse(cf.value); }catch(e){}
+    if(!CONFIG.pin){ CONFIG.pin=v; await store.set('bolao:config',JSON.stringify(CONFIG)); adminUnlocked=true; toast('Senha criada'); renderAdmin(); }
     else if(v===CONFIG.pin){ adminUnlocked=true; renderAdmin(); }
     else { toast('Senha incorreta'); }
   };
