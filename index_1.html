@@ -1,0 +1,1013 @@
+<!-- Bolão da Copa do Mundo 2026 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#06231d;
+    --bg2:#0a2e26;
+    --panel:#0e372d;
+    --panel2:#114036;
+    --line:#1c5547;
+    --green:#19e57f;
+    --green-d:#0fb863;
+    --gold:#ffc94d;
+    --magenta:#ff3d7f;
+    --txt:#eafff5;
+    --muted:#8fc7b3;
+    --shadow:0 18px 40px -18px rgba(0,0,0,.7);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--txt);font-family:'Archivo',system-ui,sans-serif}
+  body{
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(25,229,127,.10), transparent 60%),
+      radial-gradient(900px 500px at -10% 10%, rgba(255,61,127,.08), transparent 55%),
+      repeating-linear-gradient(0deg, transparent 0 39px, rgba(28,85,71,.18) 39px 40px),
+      var(--bg);
+    min-height:100vh;
+    padding-bottom:90px;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:18px 14px 0}
+  header.top{display:flex;align-items:center;gap:12px;padding:6px 2px 14px}
+  .crest{width:46px;height:46px;flex:0 0 auto;border-radius:13px;background:linear-gradient(150deg,var(--green),var(--green-d));display:grid;place-items:center;box-shadow:var(--shadow);transform:rotate(-4deg)}
+  .crest span{font-family:'Anton';font-size:26px;color:#04231a;transform:rotate(4deg)}
+  .ttl h1{font-family:'Anton';font-weight:400;font-size:30px;line-height:.92;margin:0;letter-spacing:.5px}
+  .ttl h1 b{color:var(--gold)}
+  .ttl p{margin:2px 0 0;color:var(--muted);font-size:12.5px;letter-spacing:2px;text-transform:uppercase}
+
+  /* identity bar */
+  .idbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:14px;box-shadow:var(--shadow)}
+  .idbar label{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px}
+  .idbar .grow{flex:1 1 200px}
+  input,select,button{font-family:inherit}
+  .field{width:100%;background:var(--bg2);border:1.5px solid var(--line);color:var(--txt);border-radius:11px;padding:11px 12px;font-size:15px;font-weight:600}
+  .field:focus{outline:none;border-color:var(--green)}
+  .who{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .who b{color:var(--green)}
+
+  /* tabs */
+  .tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;gap:6px;justify-content:center;padding:10px 10px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(0deg,var(--bg) 70%,transparent)}
+  .tabs button{flex:1 1 0;max-width:200px;background:var(--panel);color:var(--muted);border:1px solid var(--line);border-radius:14px;padding:11px 8px;font-weight:700;font-size:13px;letter-spacing:.4px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+  .tabs button .ic{font-size:17px}
+  .tabs button.active{background:linear-gradient(160deg,var(--green),var(--green-d));color:#042018;border-color:transparent;box-shadow:0 -2px 18px rgba(25,229,127,.35)}
+
+  /* round / day */
+  .round-head{font-family:'Anton';font-weight:400;font-size:21px;letter-spacing:1px;color:var(--gold);margin:22px 2px 6px;display:flex;align-items:center;gap:10px}
+  .round-head:after{content:"";flex:1;height:2px;background:linear-gradient(90deg,var(--line),transparent)}
+  .day-head{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:16px 4px 8px;font-weight:700}
+
+  /* day navigation */
+  .daynav{display:flex;gap:8px;overflow-x:auto;padding:6px 2px 12px;margin:0 -2px;scrollbar-width:none;position:sticky;top:0;z-index:15;background:linear-gradient(180deg,var(--bg) 78%,transparent)}
+  .daynav::-webkit-scrollbar{display:none}
+  .daychip{flex:0 0 auto;background:var(--panel);border:1px solid var(--line);color:var(--txt);border-radius:13px;padding:9px 14px;cursor:pointer;display:flex;flex-direction:column;gap:2px;text-align:left}
+  .daychip .dl{font-weight:800;font-size:14px;white-space:nowrap}
+  .daychip .dr{font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+  .daychip.active{background:linear-gradient(160deg,var(--green),var(--green-d));color:#042018;border-color:transparent;box-shadow:0 8px 20px -10px rgba(25,229,127,.7)}
+  .daychip.active .dr{color:rgba(4,32,24,.78)}
+  .daychip.closed{opacity:.5}
+  .daychip.closed.active{opacity:1}
+
+  /* match card */
+  .match{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:12px 12px 13px;margin-bottom:10px;box-shadow:var(--shadow)}
+  .meta{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);margin-bottom:9px;letter-spacing:.5px}
+  .meta .city{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%}
+  .bsb{font-size:11px;color:var(--muted);margin:-4px 0 9px;letter-spacing:.3px}
+  .lock{color:var(--gold);font-weight:700}
+  .row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
+  .team{display:flex;align-items:center;gap:7px;min-width:0}
+  .team.away{flex-direction:row-reverse;text-align:right}
+  .team .nm{font-weight:700;font-size:14.5px;line-height:1.05;overflow:hidden}
+  .scorebox{display:flex;align-items:center;gap:6px}
+  .sc{width:46px;height:46px;text-align:center;font-family:'Anton';font-size:22px;background:var(--bg2);border:1.5px solid var(--line);color:var(--txt);border-radius:12px;padding:0;-moz-appearance:textfield}
+  .sc::-webkit-outer-spin-button,.sc::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .sc:focus{outline:none;border-color:var(--green)}
+  .sc:disabled{opacity:.55}
+  .vs{font-family:'Anton';color:var(--muted);font-size:14px}
+  .result-tag{margin-top:9px;display:flex;justify-content:center;gap:8px;font-size:12px;color:var(--muted)}
+  .result-tag b{color:var(--gold)}
+  .pts{margin-left:auto;font-weight:800}
+  .pts.ok{color:var(--green)} .pts.ex{color:var(--gold)} .pts.no{color:var(--magenta)}
+
+  .savebar{position:sticky;bottom:84px;z-index:20;margin:14px 0 4px}
+  .btn{width:100%;border:none;border-radius:14px;padding:15px;font-weight:800;font-size:16px;letter-spacing:.5px;cursor:pointer}
+  .btn.primary{background:linear-gradient(160deg,var(--green),var(--green-d));color:#042018;box-shadow:0 12px 26px -10px rgba(25,229,127,.7)}
+  .btn.primary:disabled{filter:grayscale(.6) brightness(.8);cursor:not-allowed;box-shadow:none}
+  .btn.ghost{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}
+  .btn.gold{background:linear-gradient(160deg,var(--gold),#e0a72c);color:#2a1c00}
+  .btn.sm{padding:9px 12px;font-size:13px;border-radius:11px;width:auto}
+
+  /* ranking */
+  .rank-card{background:var(--panel);border:1px solid var(--line);border-radius:15px;overflow:hidden;box-shadow:var(--shadow)}
+  .rk{display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--line)}
+  .rk:last-child{border-bottom:none}
+  .rk .pos{font-family:'Anton';font-size:22px;color:var(--muted);text-align:center}
+  .rk.top1 .pos{color:var(--gold)} .rk.top2 .pos{color:#d9e6df} .rk.top3 .pos{color:#e0954a}
+  .rk .who2{font-weight:700;font-size:16px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rk .who2 small{display:block;color:var(--muted);font-weight:500;font-size:11px}
+  .rk .score{font-family:'Anton';font-size:26px;color:var(--green)}
+  .rk .score small{font-family:'Archivo';font-size:11px;color:var(--muted);font-weight:600}
+
+  .empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:14px;line-height:1.6}
+  .note{background:rgba(255,201,77,.08);border:1px solid rgba(255,201,77,.3);border-radius:12px;padding:11px 13px;font-size:12.5px;color:var(--gold);margin-bottom:12px;line-height:1.5}
+  .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);background:var(--green);color:#042018;font-weight:800;padding:12px 22px;border-radius:999px;box-shadow:var(--shadow);opacity:0;transition:.25s;z-index:60;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* admin */
+  .admin-edit .row{grid-template-columns:1fr auto 1fr}
+  .nm-edit{width:100%;background:var(--bg2);border:1.5px solid var(--line);color:var(--txt);border-radius:9px;padding:7px 8px;font-size:13.5px;font-weight:700}
+  .nm-edit:focus{outline:none;border-color:var(--green)}
+  .addbox{background:var(--panel2);border:1px dashed var(--line);border-radius:14px;padding:14px;margin:8px 0 4px}
+  .addgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .addgrid .full{grid-column:1/-1}
+  .delx{background:none;border:none;color:var(--magenta);font-weight:800;cursor:pointer;font-size:13px}
+  .pinwrap{max-width:340px;margin:30px auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;text-align:center;box-shadow:var(--shadow)}
+  .pinwrap h3{font-family:'Anton';font-weight:400;font-size:24px;margin:0 0 4px;letter-spacing:1px}
+  .pinwrap p{color:var(--muted);font-size:13px;margin:0 0 16px}
+  .hide{display:none!important}
+  .small-link{background:none;border:none;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:12px;margin-top:10px}
+  .subtabs{display:flex;gap:8px;margin-bottom:12px}
+  .subtab{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--muted);border-radius:12px;padding:11px 8px;font-weight:700;font-size:13.5px;cursor:pointer}
+  .subtab.active{background:linear-gradient(160deg,var(--green),var(--green-d));color:#042018;border-color:transparent}
+  .pview{display:grid;grid-template-columns:1fr auto 1fr auto auto;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:9px 11px;margin-bottom:7px;font-size:13px}
+  .pview .pv-home{text-align:right;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pview .pv-away{text-align:left;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pview .pv-sc{font-family:'Anton';font-size:16px;color:var(--gold);padding:0 6px;white-space:nowrap}
+  .pview .pv-res{font-size:10.5px;color:var(--muted);white-space:nowrap}
+  .pview .pts{font-weight:800;font-size:13px}
+  .pedit{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:9px 11px;margin-bottom:7px;font-size:13px}
+  .pedit .pe-home{text-align:right;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pedit .pe-away{text-align:left;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pedit .pe-sc{display:flex;align-items:center;gap:5px}
+  .pedit .pe-res{grid-column:1/-1;text-align:center;font-size:10.5px;color:var(--muted);margin-top:2px}
+  .sc.sm{width:38px;height:38px;font-size:18px}
+  .rsrow{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:8px}
+  .rsrow .rs-info{min-width:0}
+  .rsrow .rs-info b{font-size:15px}
+  .rsrow .rs-info small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+  .rsrow .rs-acts{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="crest"><span>26</span></div>
+    <div class="ttl">
+      <h1>BOLÃO <b>COPA 2026</b></h1>
+      <p>USA · México · Canadá</p>
+    </div>
+  </header>
+
+  <!-- identity / login -->
+  <div class="idbar" id="idbar"></div>
+
+  <div id="content"></div>
+</div>
+
+<nav class="tabs">
+  <button data-view="palpites" class="active"><span class="ic">⚽</span>Palpites</button>
+  <button data-view="ranking"><span class="ic">🏆</span>Ranking</button>
+  <button data-view="admin"><span class="ic">🔧</span>Organizador</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+/* ============ Storage compartilhado via Firebase Firestore ============ */
+/* >>> COLE AQUI a configuração do seu projeto Firebase (do passo 4 do guia) <<< */
+const firebaseConfig = {
+  apiKey: "AIzaSyDYfk-mIRS4DXJwMpcTiB4I1hap-2WHzEY",
+  authDomain: "bolao-copa-9023f.firebaseapp.com",
+  projectId: "bolao-copa-9023f",
+  storageBucket: "bolao-copa-9023f.firebasestorage.app",
+  messagingSenderId: "324956473170",
+  appId: "1:324956473170:web:c1549d48666d62b7d75c8b"
+};
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs }
+  from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+
+/* Mapeia as chaves "bolao:..." para documentos do Firestore.
+   - "bolao:pred:{slug}" -> coleção "preds", documento {slug}
+   - demais chaves        -> coleção "bolao",  documento da chave (sem o prefixo) */
+function ref(k){
+  if(k.startsWith('bolao:pred:')) return doc(db,'preds',k.slice('bolao:pred:'.length));
+  return doc(db,'bolao', k.replace('bolao:',''));
+}
+const store = {
+  async get(k){
+    try{ const s=await getDoc(ref(k)); return s.exists()? {key:k, value:s.data().v} : null; }
+    catch(e){ console.error('get',k,e); return null; }
+  },
+  async set(k,v){
+    try{ await setDoc(ref(k), {v}); }catch(e){ console.error('set',k,e); }
+    return {key:k, value:v};
+  },
+  async del(k){
+    try{ await deleteDoc(ref(k)); }catch(e){ console.error('del',k,e); }
+    return {deleted:true};
+  },
+  async list(p){
+    // só usamos list para os palpites (prefixo "bolao:pred:")
+    if(p==='bolao:pred:'){
+      try{ const snap=await getDocs(collection(db,'preds'));
+        return {keys: snap.docs.map(d=>'bolao:pred:'+d.id)}; }
+      catch(e){ console.error('list',e); return {keys:[]}; }
+    }
+    return {keys:[]};
+  }
+};
+
+/* ====== Fase de grupos — datas e horários LOCAIS de cada cidade-sede (tabela oficial FIFA) ====== */
+/* rodada | data | hora | mandante | visitante | cidade */
+const RAW = `
+1|2026-06-11|13:00|México|África do Sul|Cidade do México
+1|2026-06-11|20:00|Coreia do Sul|Rep. Tcheca|Guadalajara
+1|2026-06-12|15:00|Canadá|Bósnia e Herzegovina|Toronto
+1|2026-06-12|18:00|Estados Unidos|Paraguai|Los Angeles
+1|2026-06-13|12:00|Catar|Suíça|San Francisco
+1|2026-06-13|18:00|Brasil|Marrocos|Nova York/NJ
+1|2026-06-13|21:00|Haiti|Escócia|Boston
+1|2026-06-13|21:00|Austrália|Turquia|Vancouver
+1|2026-06-14|12:00|Alemanha|Curaçao|Houston
+1|2026-06-14|19:00|Costa do Marfim|Equador|Filadélfia
+1|2026-06-14|15:00|Holanda|Japão|Dallas
+1|2026-06-14|20:00|Suécia|Tunísia|Monterrey
+1|2026-06-15|12:00|Espanha|Cabo Verde|Atlanta
+1|2026-06-15|18:00|Arábia Saudita|Uruguai|Miami
+1|2026-06-15|12:00|Bélgica|Egito|Seattle
+1|2026-06-15|18:00|Irã|Nova Zelândia|Los Angeles
+1|2026-06-16|21:00|Áustria|Jordânia|San Francisco
+1|2026-06-16|15:00|França|Senegal|Nova York/NJ
+1|2026-06-16|18:00|Iraque|Noruega|Boston
+1|2026-06-16|20:00|Argentina|Argélia|Kansas City
+1|2026-06-17|12:00|Portugal|RD Congo|Houston
+1|2026-06-17|15:00|Inglaterra|Croácia|Dallas
+1|2026-06-17|19:00|Gana|Panamá|Toronto
+1|2026-06-17|20:00|Uzbequistão|Colômbia|Cidade do México
+2|2026-06-18|12:00|Rep. Tcheca|África do Sul|Atlanta
+2|2026-06-18|12:00|Suíça|Bósnia e Herzegovina|Los Angeles
+2|2026-06-18|15:00|Canadá|Catar|Vancouver
+2|2026-06-18|19:00|México|Coreia do Sul|Guadalajara
+2|2026-06-19|20:00|Turquia|Paraguai|San Francisco
+2|2026-06-19|12:00|Estados Unidos|Austrália|Seattle
+2|2026-06-19|18:00|Escócia|Marrocos|Boston
+2|2026-06-19|20:30|Brasil|Haiti|Filadélfia
+2|2026-06-20|20:00|Tunísia|Japão|Monterrey
+2|2026-06-20|12:00|Holanda|Suécia|Houston
+2|2026-06-20|16:00|Alemanha|Costa do Marfim|Toronto
+2|2026-06-20|19:00|Equador|Curaçao|Kansas City
+2|2026-06-21|12:00|Espanha|Arábia Saudita|Atlanta
+2|2026-06-21|12:00|Bélgica|Irã|Los Angeles
+2|2026-06-21|18:00|Uruguai|Cabo Verde|Miami
+2|2026-06-21|18:00|Nova Zelândia|Egito|Vancouver
+2|2026-06-22|12:00|Argentina|Áustria|Dallas
+2|2026-06-22|17:00|França|Iraque|Filadélfia
+2|2026-06-22|20:00|Noruega|Senegal|Nova York/NJ
+2|2026-06-22|20:00|Jordânia|Argélia|San Francisco
+2|2026-06-23|12:00|Portugal|Uzbequistão|Houston
+2|2026-06-23|16:00|Inglaterra|Gana|Boston
+2|2026-06-23|19:00|Panamá|Croácia|Toronto
+2|2026-06-23|20:00|Colômbia|RD Congo|Guadalajara
+3|2026-06-24|12:00|Suíça|Canadá|Vancouver
+3|2026-06-24|12:00|Bósnia e Herzegovina|Catar|Seattle
+3|2026-06-24|18:00|Escócia|Brasil|Miami
+3|2026-06-24|18:00|Marrocos|Haiti|Atlanta
+3|2026-06-24|19:00|Rep. Tcheca|México|Cidade do México
+3|2026-06-24|19:00|África do Sul|Coreia do Sul|Monterrey
+3|2026-06-25|16:00|Equador|Alemanha|Nova York/NJ
+3|2026-06-25|16:00|Curaçao|Costa do Marfim|Filadélfia
+3|2026-06-25|18:00|Japão|Suécia|Dallas
+3|2026-06-25|18:00|Tunísia|Holanda|Kansas City
+3|2026-06-25|19:00|Turquia|Estados Unidos|Los Angeles
+3|2026-06-25|19:00|Paraguai|Austrália|San Francisco
+3|2026-06-26|15:00|Noruega|França|Boston
+3|2026-06-26|15:00|Senegal|Iraque|Toronto
+3|2026-06-26|19:00|Cabo Verde|Arábia Saudita|Houston
+3|2026-06-26|18:00|Uruguai|Espanha|Guadalajara
+3|2026-06-26|20:00|Egito|Irã|Seattle
+3|2026-06-26|20:00|Nova Zelândia|Bélgica|Vancouver
+3|2026-06-27|17:00|Panamá|Inglaterra|Nova York/NJ
+3|2026-06-27|17:00|Croácia|Gana|Filadélfia
+3|2026-06-27|19:30|Colômbia|Portugal|Miami
+3|2026-06-27|19:30|RD Congo|Uzbequistão|Atlanta
+3|2026-06-27|21:00|Argélia|Áustria|Kansas City
+3|2026-06-27|21:00|Jordânia|Argentina|Dallas
+`.trim();
+
+const DOW=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const ROUND_LABEL={'1':'1ª Rodada','2':'2ª Rodada','3':'3ª Rodada'};
+/* Fuso UTC de cada cidade-sede em junho/julho 2026 */
+const CITY_OFFSET={
+  'Cidade do México':'-06:00','Guadalajara':'-06:00','Monterrey':'-06:00',
+  'Vancouver':'-07:00','Seattle':'-07:00','San Francisco':'-07:00','Los Angeles':'-07:00',
+  'Dallas':'-05:00','Houston':'-05:00','Kansas City':'-05:00',
+  'Toronto':'-04:00','Atlanta':'-04:00','Miami':'-04:00','Boston':'-04:00','Nova York/NJ':'-04:00','Filadélfia':'-04:00'
+};
+function brasilia(kickoffISO){
+  return new Date(kickoffISO).toLocaleString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'America/Sao_Paulo'});
+}
+function buildDefaults(){
+  return RAW.split('\n').map((ln,i)=>{
+    const [r,date,time,home,away,city]=ln.split('|');
+    const [Y,M,D]=date.split('-');
+    const dow=DOW[new Date(date+'T12:00:00Z').getUTCDay()];
+    const off=CITY_OFFSET[city]||'-04:00';
+    return {
+      id:'r'+r+'-'+String(i).padStart(3,'0'),
+      rodada:ROUND_LABEL[r]||r,
+      ord:parseInt(r,10),
+      dia:`${dow}, ${D}/${M}`,
+      diaSort:date,
+      hora:time,
+      kickoff:`${date}T${time}:00${off}`,
+      home, away, city
+    };
+  });
+}
+
+/* ============ State ============ */
+let MATCHES=[], RESULTS={}, view='palpites';
+let currentName='', currentSlug='', currentPreds={};
+let ROSTER=[]; // lista oficial de participantes (definida pelo organizador)
+let authedSlug=''; // pessoa autenticada na sessão atual
+let adminUnlocked=false, CONFIG={pin:null}, selectedDay=null, adminTab='resultados';
+
+const slug=s=>s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const $=id=>document.getElementById(id);
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800);}
+const outcome=(h,a)=> h>a?'H':(h<a?'A':'D');
+const LOCK_BUFFER=30*60*1000; // palpite fecha 30 min antes do início
+const isLocked=m=> Date.now() > (new Date(m.kickoff).getTime() - LOCK_BUFFER);
+const closeTime=m=>{
+  // fecha 30 min antes do início — exibido em HORÁRIO DE BRASÍLIA
+  const d=new Date(new Date(m.kickoff).getTime()-LOCK_BUFFER);
+  return d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',timeZone:'America/Sao_Paulo'});
+};
+const shortRound=r=> r.replace(' Rodada','');
+
+function pointsFor(pred,res){
+  if(!pred||!res) return null;
+  if(pred.h===''||pred.a===''||res.h===''||res.a===''||pred.h==null||pred.a==null) return null;
+  const ph=+pred.h, pa=+pred.a, rh=+res.h, ra=+res.a;
+  if(ph===rh && pa===ra) return 2;
+  if(outcome(ph,pa)===outcome(rh,ra)) return 1;
+  return 0;
+}
+
+/* ============ Load ============ */
+async function loadAll(){
+  const m=await store.get('bolao:matches');
+  MATCHES = (m&&m.value)? JSON.parse(m.value) : buildDefaults();
+  // Corrige nomes das vagas de repescagem caso a base tenha sido salva antes da definição dos times
+  const REP_FIX={
+    'Repescagem UEFA-A':'Rep. Tcheca','Repescagem UEFA-B':'Bósnia e Herzegovina',
+    'Repescagem UEFA-C':'Turquia','Repescagem UEFA-D':'Suécia',
+    'Repescagem Inter.1':'Iraque','Repescagem Inter.2':'RD Congo'
+  };
+  let fixed=false;
+  MATCHES.forEach(mt=>{
+    if(REP_FIX[mt.home]){mt.home=REP_FIX[mt.home];fixed=true;}
+    if(REP_FIX[mt.away]){mt.away=REP_FIX[mt.away];fixed=true;}
+  });
+  // Re-sincroniza a fase de grupos com a tabela oficial da FIFA (datas e horários LOCAIS).
+  // Mantém resultados já lançados (guardados à parte) e jogos do mata-mata adicionados manualmente.
+  const SCHED_VER='fifa-local-1';
+  const verRec=await store.get('bolao:schedver');
+  if(!verRec || (verRec.value!==SCHED_VER)){
+    const defs={}; buildDefaults().forEach(d=>defs[d.id]=d);
+    MATCHES.forEach(mt=>{
+      const d=defs[mt.id];
+      if(d){ mt.rodada=d.rodada; mt.ord=d.ord; mt.dia=d.dia; mt.diaSort=d.diaSort;
+             mt.hora=d.hora; mt.kickoff=d.kickoff; mt.city=d.city;
+             mt.home=d.home; mt.away=d.away; }
+    });
+    fixed=true;
+    await store.set('bolao:schedver', SCHED_VER);
+  }
+  if(!m || fixed) await store.set('bolao:matches', JSON.stringify(MATCHES));
+  const r=await store.get('bolao:results'); RESULTS = (r&&r.value)?JSON.parse(r.value):{};
+  const c=await store.get('bolao:config'); CONFIG = (c&&c.value)?JSON.parse(c.value):{pin:null};
+  // Lista oficial de participantes (cadastrada pelo organizador)
+  const rs=await store.get('bolao:roster'); ROSTER = (rs&&rs.value)?JSON.parse(rs.value):[];
+  // Migração única para o sistema de identidade fechada: descarta palpites antigos (nome digitado livre)
+  const idv=await store.get('bolao:identver');
+  if(!idv || idv.value!=='roster-1'){
+    const l=await store.list('bolao:pred:');
+    for(const k of (l.keys||[])){ await store.del(k); }
+    await store.set('bolao:identver','roster-1');
+  }
+  await refreshNames();
+}
+async function refreshNames(){
+  const rs=await store.get('bolao:roster'); ROSTER = (rs&&rs.value)?JSON.parse(rs.value):[];
+}
+const rosterSlug=name=>slug(name);
+async function getPerson(s){
+  const g=await store.get('bolao:pred:'+s);
+  if(g&&g.value){ try{ return JSON.parse(g.value); }catch(e){} }
+  return null;
+}
+async function loadPreds(name){
+  const g=await getPerson(slug(name));
+  currentPreds = g? (g.preds||{}) : {};
+}
+
+/* ============ Grouping helper ============ */
+function grouped(){
+  const sorted=[...MATCHES].sort((a,b)=> (a.ord-b.ord) || a.diaSort.localeCompare(b.diaSort) || a.hora.localeCompare(b.hora));
+  const out=[];
+  let curR=null,curD=null;
+  for(const m of sorted){
+    if(!curR||curR.rodada!==m.rodada){curR={rodada:m.rodada,days:[]};out.push(curR);curD=null;}
+    if(!curD||curD.dia!==m.dia){curD={dia:m.dia,matches:[]};curR.days.push(curD);}
+    curD.matches.push(m);
+  }
+  return out;
+}
+function flatDays(){
+  const sorted=[...MATCHES].sort((a,b)=> (a.ord-b.ord) || a.diaSort.localeCompare(b.diaSort) || a.hora.localeCompare(b.hora));
+  const days=[]; let cur=null;
+  for(const m of sorted){
+    if(!cur||cur.key!==m.diaSort){cur={key:m.diaSort,label:m.dia,rodada:m.rodada,matches:[]};days.push(cur);}
+    cur.matches.push(m);
+  }
+  return days;
+}
+
+/* ============ Render: Palpites ============ */
+function renderPalpites(){
+  const c=$('content'); c.innerHTML='';
+  if(!authedSlug){
+    if(!ROSTER.length){
+      c.innerHTML=`<div class="empty">⚽<br><br>O bolão ainda não tem participantes cadastrados.<br>O organizador precisa cadastrar a lista de nomes na aba <b>Organizador → Participantes</b>.</div>`;
+    } else {
+      c.innerHTML=`<div class="empty">🔒<br><br>Selecione seu nome na lista acima e entre com sua senha para palpitar.</div>`;
+    }
+    return;
+  }
+  const note=document.createElement('div');note.className='note';
+  note.innerHTML='Escolha o dia e preencha os placares. <b>Acertar quem vence = 1 ponto · Placar exato = 2 pontos.</b> Os horários mostrados são <b>locais da cidade-sede</b> (a hora de Brasília aparece logo abaixo de cada jogo). Cada jogo fecha <b>30 minutos antes do apito inicial</b>. O que você digita já fica guardado ao trocar de dia — toque em <b>Salvar</b> para gravar.';
+  c.appendChild(note);
+
+  const days=flatDays();
+  if(!selectedDay || !days.some(d=>d.key===selectedDay)){
+    const open=days.find(d=>d.matches.some(m=>!isLocked(m)));
+    selectedDay = open? open.key : (days.length?days[days.length-1].key:null);
+  }
+
+  const nav=document.createElement('div');nav.className='daynav';
+  days.forEach(d=>{
+    const allClosed=d.matches.every(m=>isLocked(m));
+    const b=document.createElement('button');
+    b.className='daychip'+(d.key===selectedDay?' active':'')+(allClosed?' closed':'');
+    b.innerHTML=`<span class="dl">${d.label}</span><span class="dr">${shortRound(d.rodada)} · ${d.matches.length} jogos${allClosed?' 🔒':''}</span>`;
+    b.onclick=()=>{ selectedDay=d.key; renderPalpites(); };
+    nav.appendChild(b);
+  });
+  c.appendChild(nav);
+
+  const day=days.find(d=>d.key===selectedDay);
+  if(day){
+    const rh=document.createElement('div');rh.className='round-head';rh.textContent=day.rodada;c.appendChild(rh);
+    const dh=document.createElement('div');dh.className='day-head';dh.textContent=day.label;c.appendChild(dh);
+    day.matches.forEach(m=>c.appendChild(matchCardPalpite(m)));
+  }
+
+  const bar=document.createElement('div');bar.className='savebar';
+  bar.innerHTML=`<button class="btn primary" id="saveBtn">Salvar palpites de ${currentName}</button>`;
+  c.appendChild(bar);
+  $('saveBtn').onclick=savePreds;
+
+  const act=nav.querySelector('.daychip.active'); if(act) act.scrollIntoView({inline:'center',block:'nearest'});
+}
+
+function matchCardPalpite(m){
+  const el=document.createElement('div');el.className='match';
+  const res=RESULTS[m.id];
+  const pred=currentPreds[m.id];
+  const committed = !!(pred && pred.h!=null && pred.a!=null); // já salvou palpite deste jogo
+  const timeLocked=isLocked(m);
+  const locked = committed || timeLocked;
+  const ph=pred&&pred.h!=null?pred.h:'';
+  const pa=pred&&pred.a!=null?pred.a:'';
+  let statusTag;
+  if(committed) statusTag='<span class="lock">🔒 palpite enviado</span>';
+  else if(timeLocked) statusTag='<span class="lock">🔒 fechado</span>';
+  else statusTag=`<span style="color:var(--green)">aberto até ${closeTime(m)} (Brasília)</span>`;
+  el.innerHTML=`
+    <div class="meta">
+      <span><b>${m.hora}</b> · ${m.city}</span>
+      ${statusTag}
+    </div>
+    <div class="bsb">🇧🇷 ${brasilia(m.kickoff)} (Brasília)</div>
+    <div class="row">
+      <div class="team home"><span class="nm">${m.home}</span></div>
+      <div class="scorebox">
+        <input class="sc" type="number" min="0" inputmode="numeric" data-id="${m.id}" data-side="h" value="${ph}" ${locked?'disabled':''}>
+        <span class="vs">×</span>
+        <input class="sc" type="number" min="0" inputmode="numeric" data-id="${m.id}" data-side="a" value="${pa}" ${locked?'disabled':''}>
+      </div>
+      <div class="team away"><span class="nm">${m.away}</span></div>
+    </div>`;
+  if(res){
+    const pts=pointsFor(pred,res);
+    const tag=document.createElement('div');tag.className='result-tag';
+    let cls=pts===2?'ex':(pts===1?'ok':'no');
+    tag.innerHTML=`Resultado oficial: <b>${res.h} × ${res.a}</b>` + (pts!=null?`<span class="pts ${cls}">${pts===2?'+2 placar exato!':(pts===1?'+1 acertou':'0 pts')}</span>`:'');
+    el.appendChild(tag);
+  }
+  return el;
+}
+
+async function savePreds(){
+  if(!authedSlug){toast('Entre com seu nome e senha primeiro');return;}
+  const name=currentName, s=authedSlug;
+  // jogos já enviados (definitivos) não podem ser sobrescritos
+  const committed={};
+  Object.keys(currentPreds).forEach(k=>{
+    const p=currentPreds[k];
+    if(p && p.h!=null && p.a!=null) committed[k]={h:p.h,a:p.a};
+  });
+  const preds={...currentPreds};
+  document.querySelectorAll('.sc').forEach(inp=>{
+    const id=inp.dataset.id, side=inp.dataset.side, v=inp.value;
+    if(committed[id]) return; // não mexe em palpite já enviado
+    if(!preds[id]) preds[id]={h:null,a:null};
+    preds[id][side]= v===''?null:Math.max(0,parseInt(v,10));
+  });
+  // restaura os definitivos por garantia
+  Object.assign(preds, committed);
+  // remove entradas vazias (jogos não palpitados)
+  Object.keys(preds).forEach(k=>{if(preds[k].h==null||preds[k].a==null)delete preds[k];});
+  currentPreds=preds;
+  const rec=await getPerson(s); // preserva a senha já cadastrada
+  await store.set('bolao:pred:'+s, JSON.stringify({name, pass:(rec&&rec.pass)||null, preds, updated:Date.now()}));
+  if(view==='palpites') renderPalpites();
+  toast('✅ Palpites de '+name+' enviados!');
+}
+
+/* ============ Render: Ranking ============ */
+async function renderRanking(){
+  const c=$('content'); c.innerHTML='<div class="empty">Calculando ranking…</div>';
+  const l=await store.list('bolao:pred:');
+  const people=[];
+  for(const k of (l.keys||[])){
+    const g=await store.get(k); if(!g||!g.value)continue;
+    let obj; try{obj=JSON.parse(g.value);}catch(e){continue;}
+    let total=0, exatos=0, certos=0, jogos=0;
+    for(const id in obj.preds){
+      const pts=pointsFor(obj.preds[id], RESULTS[id]);
+      if(pts==null)continue;
+      jogos++; total+=pts; if(pts===2)exatos++; else if(pts===1)certos++;
+    }
+    people.push({name:obj.name,total,exatos,certos,jogos});
+  }
+  people.sort((a,b)=> b.total-a.total || b.exatos-a.exatos || a.name.localeCompare(b.name));
+  c.innerHTML='';
+  const rh=document.createElement('div');rh.className='round-head';rh.textContent='🏆 Classificação';c.appendChild(rh);
+  if(!people.length){c.innerHTML+='<div class="empty">Nenhum palpite salvo ainda.<br>Os pontos aparecem quando o organizador lançar os resultados.</div>';return;}
+  const card=document.createElement('div');card.className='rank-card';
+  people.forEach((p,i)=>{
+    const row=document.createElement('div');row.className='rk'+(i<3?' top'+(i+1):'');
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+    row.innerHTML=`
+      <div class="pos">${medal}</div>
+      <div class="who2">${p.name}<small>${p.exatos} placar exato · ${p.certos} resultado · ${p.jogos} jogos pontuados</small></div>
+      <div class="score">${p.total}<small> pts</small></div>`;
+    card.appendChild(row);
+  });
+  c.appendChild(card);
+}
+
+/* ============ Render: Admin ============ */
+async function renderAdmin(){
+  const c=$('content'); c.innerHTML='';
+  if(!adminUnlocked){ renderPinGate(c); return; }
+
+  const sub=document.createElement('div');sub.className='subtabs';
+  sub.innerHTML=`
+    <button class="subtab${adminTab==='resultados'?' active':''}" data-t="resultados">Resultados & Jogos</button>
+    <button class="subtab${adminTab==='palpites'?' active':''}" data-t="palpites">Ver palpites</button>
+    <button class="subtab${adminTab==='roster'?' active':''}" data-t="roster">Participantes</button>`;
+  sub.querySelectorAll('.subtab').forEach(b=>b.onclick=()=>{adminTab=b.dataset.t;renderAdmin();});
+  c.appendChild(sub);
+
+  if(adminTab==='palpites'){ await renderAdminPalpites(c); return; }
+  if(adminTab==='roster'){ await renderAdminRoster(c); return; }
+  renderAdminResultados(c);
+}
+
+async function renderAdminPalpites(c){
+  const note=document.createElement('div');note.className='note';
+  note.innerHTML='Palpites de todos os participantes. Escolha uma pessoa para ver e <b>editar</b> os palpites dela jogo a jogo, ou <b>excluir</b> o participante. A pontuação aparece quando o resultado oficial já tiver sido lançado.';
+  c.appendChild(note);
+
+  // carrega todos os participantes
+  const l=await store.list('bolao:pred:');
+  const people=[];
+  for(const k of (l.keys||[])){
+    const g=await store.get(k); if(!g||!g.value)continue;
+    let obj; try{obj=JSON.parse(g.value);}catch(e){continue;}
+    let total=0,count=0;
+    for(const id in obj.preds){ const pts=pointsFor(obj.preds[id],RESULTS[id]); if(pts!=null){total+=pts;} count++; }
+    people.push({key:k, name:obj.name, preds:obj.preds||{}, total, count, updated:obj.updated||0});
+  }
+  if(!people.length){
+    const e=document.createElement('div');e.className='empty';
+    e.textContent='Nenhum participante salvou palpites ainda.';
+    c.appendChild(e); return;
+  }
+  people.sort((a,b)=>a.name.localeCompare(b.name));
+
+  const sel=document.createElement('select');sel.className='field';sel.style.marginBottom='6px';
+  sel.innerHTML='<option value="">— Escolha um participante —</option>'+
+    people.map((p,i)=>`<option value="${i}">${p.name} (${p.count} palpites)</option>`).join('');
+  c.appendChild(sel);
+
+  const box=document.createElement('div');c.appendChild(box);
+
+  function show(idx){
+    box.innerHTML='';
+    if(idx===''){ return; }
+    const p=people[+idx];
+    const head=document.createElement('div');head.className='round-head';
+    head.textContent=`${p.name} — ${p.total} pts`;
+    box.appendChild(head);
+
+    // ações: excluir participante
+    const actions=document.createElement('div');actions.style.cssText='display:flex;gap:8px;margin:0 0 10px';
+    actions.innerHTML=`<button class="btn ghost sm" id="delPerson">🗑️ Excluir participante</button>`;
+    box.appendChild(actions);
+    actions.querySelector('#delPerson').onclick=async()=>{
+      if(!confirm(`Excluir o participante "${p.name}" e TODOS os palpites dele? Essa ação não pode ser desfeita.`))return;
+      await store.del(p.key);
+      await refreshNames();
+      toast('Participante excluído');
+      renderAdmin();
+    };
+
+    const editNote=document.createElement('div');editNote.className='bsb';editNote.style.margin='0 4px 8px';
+    editNote.textContent='Você pode editar qualquer placar abaixo (inclusive jogos já enviados) e salvar. Deixe os dois campos vazios para apagar o palpite daquele jogo.';
+    box.appendChild(editNote);
+
+    // dropdown de rodadas
+    const rounds=[]; grouped().forEach(R=>{ if(!rounds.includes(R.rodada)) rounds.push(R.rodada); });
+    const rsel=document.createElement('select');rsel.className='field';rsel.style.marginBottom='8px';
+    rsel.innerHTML='<option value="__all">Todas as rodadas</option>'+rounds.map(r=>`<option value="${r}">${r}</option>`).join('');
+    box.appendChild(rsel);
+
+    const listBox=document.createElement('div');box.appendChild(listBox);
+
+    function persistVisible(){
+      // guarda no objeto da pessoa o que estiver visível, antes de trocar de rodada
+      listBox.querySelectorAll('.sc[data-ed]').forEach(inp=>{
+        const id=inp.dataset.ed, side=inp.dataset.side, v=inp.value;
+        if(!p.preds[id]) p.preds[id]={h:null,a:null};
+        p.preds[id][side]= v===''?null:Math.max(0,parseInt(v,10));
+      });
+    }
+
+    function renderList(filter){
+      listBox.innerHTML='';
+      let any=false;
+      grouped().forEach(R=>{
+        if(filter!=='__all' && R.rodada!==filter) return;
+        const matches=R.days.flatMap(d=>d.matches).filter(m=>p.preds[m.id]);
+        if(!matches.length) return;
+        const rh=document.createElement('div');rh.className='day-head';rh.textContent=R.rodada;listBox.appendChild(rh);
+        matches.forEach(m=>{
+          any=true;
+          const pr=p.preds[m.id], res=RESULTS[m.id];
+          const pts=pointsFor(pr,res);
+          const row=document.createElement('div');row.className='pedit';
+          let tag='';
+          if(res){ const cls=pts===2?'ex':(pts===1?'ok':'no');
+            tag=`<span class="pts ${cls}">${pts===2?'+2':(pts===1?'+1':'0')}</span>`; }
+          row.innerHTML=`
+            <span class="pe-home">${m.home}</span>
+            <span class="pe-sc">
+              <input class="sc sm" type="number" min="0" inputmode="numeric" data-ed="${m.id}" data-side="h" value="${pr.h}">
+              <span class="vs">×</span>
+              <input class="sc sm" type="number" min="0" inputmode="numeric" data-ed="${m.id}" data-side="a" value="${pr.a}">
+            </span>
+            <span class="pe-away">${m.away}</span>
+            ${res?`<span class="pe-res">of.: ${res.h}×${res.a} ${tag}</span>`:'<span class="pe-res">—</span>'}`;
+          listBox.appendChild(row);
+        });
+      });
+      if(!any){ const e=document.createElement('div');e.className='empty';
+        e.textContent = filter==='__all' ? 'Esta pessoa ainda não enviou nenhum palpite.' : 'Nenhum palpite desta pessoa nesta rodada.';
+        listBox.appendChild(e); }
+    }
+
+    rsel.onchange=()=>{ persistVisible(); renderList(rsel.value); };
+    renderList('__all');
+
+    const saveBar=document.createElement('div');saveBar.style.cssText='margin:14px 0 6px';
+    saveBar.innerHTML=`<button class="btn primary" id="savePerson">Salvar alterações de ${p.name}</button>`;
+    box.appendChild(saveBar);
+    saveBar.querySelector('#savePerson').onclick=async()=>{
+      persistVisible(); // captura a rodada visível atual
+      const newPreds={...p.preds};
+      // remove palpites com algum campo vazio
+      Object.keys(newPreds).forEach(k=>{if(newPreds[k].h==null||newPreds[k].a==null)delete newPreds[k];});
+      p.preds=newPreds;
+      await store.set(p.key, JSON.stringify({name:p.name,preds:newPreds,updated:Date.now()}));
+      toast('Palpites de '+p.name+' atualizados');
+      renderAdmin();
+    };
+  }
+  sel.onchange=()=>show(sel.value);
+}
+
+async function renderAdminRoster(c){
+  const note=document.createElement('div');note.className='note';
+  note.innerHTML='Cadastre aqui a <b>lista oficial de participantes</b>. Cada pessoa vai escolher o próprio nome nesta lista (sem digitar) e criar uma senha no primeiro acesso — assim ninguém erra o nome nem usa o nome de outro. Você pode <b>resetar a senha</b> de quem esqueceu.';
+  c.appendChild(note);
+
+  // adicionar nome
+  const add=document.createElement('div');add.className='addbox';
+  add.innerHTML=`
+    <div class="day-head" style="margin:0 0 10px">➕ Adicionar participante</div>
+    <div style="display:flex;gap:8px">
+      <input class="field" id="r_name" placeholder="Nome do participante" autocomplete="off" style="flex:1">
+      <button class="btn gold sm" id="r_add">Adicionar</button>
+    </div>`;
+  c.appendChild(add);
+
+  async function saveRoster(){ await store.set('bolao:roster', JSON.stringify(ROSTER)); }
+
+  $('r_add').onclick=async()=>{
+    const nm=$('r_name').value.trim().replace(/\s+/g,' ');
+    if(!nm){toast('Digite um nome');return;}
+    const s=rosterSlug(nm);
+    if(ROSTER.some(n=>rosterSlug(n)===s)){toast('Já existe um participante com esse nome');return;}
+    ROSTER.push(nm); await saveRoster(); toast('Participante adicionado'); renderAdmin();
+  };
+  $('r_name').addEventListener('keydown',e=>{if(e.key==='Enter')$('r_add').click();});
+
+  if(!ROSTER.length){
+    const e=document.createElement('div');e.className='empty';e.textContent='Nenhum participante cadastrado ainda.';c.appendChild(e);return;
+  }
+
+  const rh=document.createElement('div');rh.className='round-head';rh.textContent=`Participantes (${ROSTER.length})`;c.appendChild(rh);
+
+  // status de cada um (tem senha? já palpitou?)
+  for(const nm of ROSTER.slice().sort((a,b)=>a.localeCompare(b))){
+    const s=rosterSlug(nm);
+    const rec=await getPerson(s);
+    const hasPass=!!(rec&&rec.pass);
+    const nPal=rec&&rec.preds?Object.keys(rec.preds).length:0;
+    const row=document.createElement('div');row.className='rsrow';
+    row.innerHTML=`
+      <div class="rs-info">
+        <b>${nm}</b>
+        <small>${hasPass?'🔑 senha definida':'⏳ sem senha (1º acesso pendente)'} · ${nPal} palpites</small>
+      </div>
+      <div class="rs-acts">
+        ${hasPass?`<button class="btn ghost sm" data-reset="${s}">Resetar senha</button>`:''}
+        <button class="delx" data-delp="${s}">excluir</button>
+      </div>`;
+    c.appendChild(row);
+    const rb=row.querySelector('[data-reset]');
+    if(rb) rb.onclick=async()=>{
+      if(!confirm(`Resetar a senha de "${nm}"? Ela poderá criar uma nova senha no próximo acesso (os palpites são mantidos).`))return;
+      const r2=await getPerson(s)||{name:nm,preds:{}};
+      r2.pass=null; r2.name=nm;
+      await store.set('bolao:pred:'+s, JSON.stringify(r2));
+      toast('Senha resetada'); renderAdmin();
+    };
+    row.querySelector('[data-delp]').onclick=async()=>{
+      if(!confirm(`Excluir "${nm}" do bolão? Isso remove o nome da lista e todos os palpites dele.`))return;
+      ROSTER=ROSTER.filter(n=>rosterSlug(n)!==s); await saveRoster();
+      await store.del('bolao:pred:'+s);
+      toast('Participante excluído'); renderAdmin();
+    };
+  }
+}
+
+function renderAdminResultados(c){
+  const note=document.createElement('div');note.className='note';
+  note.innerHTML='Lance aqui o <b>placar oficial</b> de cada jogo (o ranking atualiza sozinho). Você também pode <b>corrigir os times</b> e <b>adicionar jogos</b> do mata-mata.';
+  c.appendChild(note);
+
+  grouped().forEach(R=>{
+    const rh=document.createElement('div');rh.className='round-head';rh.textContent=R.rodada;c.appendChild(rh);
+    R.days.forEach(Dy=>{
+      const dh=document.createElement('div');dh.className='day-head';dh.textContent=Dy.dia;c.appendChild(dh);
+      Dy.matches.forEach(m=>c.appendChild(matchCardAdmin(m)));
+    });
+  });
+
+  // add match box
+  const add=document.createElement('div');add.className='addbox';
+  add.innerHTML=`
+    <div class="day-head" style="margin:0 0 10px">➕ Adicionar jogo (mata-mata, etc.)</div>
+    <div class="addgrid">
+      <input class="field" id="a_rod" placeholder="Rodada (ex.: Oitavas)">
+      <input class="field" id="a_data" type="date" value="2026-06-28">
+      <input class="field" id="a_hora" placeholder="Hora (ex.: 16:00)" value="16:00">
+      <input class="field" id="a_city" placeholder="Cidade">
+      <input class="field full" id="a_home" placeholder="Mandante">
+      <input class="field full" id="a_away" placeholder="Visitante">
+      <button class="btn gold full" id="addMatchBtn">Adicionar jogo</button>
+    </div>`;
+  c.appendChild(add);
+  $('addMatchBtn').onclick=addMatch;
+
+  const danger=document.createElement('button');
+  danger.className='small-link';danger.textContent='Restaurar tabela oficial padrão (apaga edições de jogos, mantém palpites)';
+  danger.onclick=async()=>{ if(confirm('Restaurar todos os jogos para a tabela oficial padrão?')){ MATCHES=buildDefaults(); await store.set('bolao:matches',JSON.stringify(MATCHES)); toast('Tabela restaurada'); renderAdmin(); } };
+  c.appendChild(danger);
+
+  const lock=document.createElement('button');
+  lock.className='small-link';lock.textContent='Sair do modo organizador';lock.style.display='block';
+  lock.onclick=()=>{adminUnlocked=false;renderAdmin();};
+  c.appendChild(lock);
+}
+
+function matchCardAdmin(m){
+  const el=document.createElement('div');el.className='match admin-edit';
+  const res=RESULTS[m.id]||{h:'',a:''};
+  el.innerHTML=`
+    <div class="meta"><span>${m.hora}</span><span class="city">${m.city}</span>
+      <button class="delx" data-del="${m.id}">excluir</button></div>
+    <div class="row">
+      <input class="nm-edit" data-edit="${m.id}" data-f="home" value="${m.home}">
+      <div class="scorebox">
+        <input class="sc" type="number" min="0" inputmode="numeric" data-res="${m.id}" data-side="h" value="${res.h}">
+        <span class="vs">×</span>
+        <input class="sc" type="number" min="0" inputmode="numeric" data-res="${m.id}" data-side="a" value="${res.a}">
+      </div>
+      <input class="nm-edit" data-edit="${m.id}" data-f="away" value="${m.away}" style="text-align:right">
+    </div>
+    <div style="margin-top:10px;display:flex;gap:8px">
+      <button class="btn primary sm" style="flex:1" data-save="${m.id}">Salvar resultado</button>
+      <button class="btn ghost sm" data-clear="${m.id}">Limpar</button>
+    </div>`;
+  el.querySelector('[data-save]').onclick=()=>saveResult(m.id);
+  el.querySelector('[data-clear]').onclick=()=>clearResult(m.id);
+  el.querySelector('[data-del]').onclick=()=>delMatch(m.id);
+  return el;
+}
+
+async function saveResult(id){
+  const h=document.querySelector(`[data-res="${id}"][data-side="h"]`).value;
+  const a=document.querySelector(`[data-res="${id}"][data-side="a"]`).value;
+  const home=document.querySelector(`[data-edit="${id}"][data-f="home"]`).value.trim();
+  const away=document.querySelector(`[data-edit="${id}"][data-f="away"]`).value.trim();
+  const m=MATCHES.find(x=>x.id===id);
+  if(m){ m.home=home||m.home; m.away=away||m.away; await store.set('bolao:matches',JSON.stringify(MATCHES)); }
+  if(h===''||a===''){ toast('Preencha os dois placares'); return; }
+  RESULTS[id]={h:Math.max(0,parseInt(h,10)),a:Math.max(0,parseInt(a,10))};
+  await store.set('bolao:results',JSON.stringify(RESULTS));
+  toast('Resultado salvo');
+}
+async function clearResult(id){
+  delete RESULTS[id]; await store.set('bolao:results',JSON.stringify(RESULTS));
+  toast('Resultado removido'); renderAdmin();
+}
+async function delMatch(id){
+  if(!confirm('Excluir este jogo?'))return;
+  MATCHES=MATCHES.filter(x=>x.id!==id); delete RESULTS[id];
+  await store.set('bolao:matches',JSON.stringify(MATCHES));
+  await store.set('bolao:results',JSON.stringify(RESULTS));
+  renderAdmin();
+}
+async function addMatch(){
+  const rod=$('a_rod').value.trim(), date=$('a_data').value, hora=$('a_hora').value.trim();
+  const home=$('a_home').value.trim(), away=$('a_away').value.trim(), city=$('a_city').value.trim();
+  if(!rod||!date||!hora||!home||!away){toast('Preencha rodada, data, hora e os dois times');return;}
+  const [Y,M,D]=date.split('-');
+  const dow=DOW[new Date(date+'T12:00:00Z').getUTCDay()];
+  MATCHES.push({
+    id:'kn-'+Date.now(), rodada:rod, ord:(MATCHES.find(x=>x.rodada===rod)?.ord)||100,
+    dia:`${dow}, ${D}/${M}`, diaSort:date, hora, kickoff:`${date}T${hora}:00-03:00`,
+    home, away, city:city||'—'
+  });
+  await store.set('bolao:matches',JSON.stringify(MATCHES));
+  toast('Jogo adicionado'); renderAdmin();
+}
+
+function renderPinGate(c){
+  const setup = !CONFIG.pin;
+  const box=document.createElement('div');box.className='pinwrap';
+  box.innerHTML=`
+    <h3>${setup?'CRIAR SENHA':'MODO ORGANIZADOR'}</h3>
+    <p>${setup?'Defina uma senha. Só quem tiver ela poderá lançar os resultados.':'Digite a senha do organizador para lançar resultados.'}</p>
+    <input class="field" id="pinInput" type="password" inputmode="numeric" placeholder="${setup?'Nova senha':'Senha'}" style="text-align:center;letter-spacing:4px;margin-bottom:12px">
+    <button class="btn primary" id="pinBtn">${setup?'Salvar senha e entrar':'Entrar'}</button>`;
+  c.appendChild(box);
+  $('pinBtn').onclick=async()=>{
+    const v=$('pinInput').value.trim();
+    if(!v){toast('Digite a senha');return;}
+    if(setup){ CONFIG.pin=v; await store.set('bolao:config',JSON.stringify(CONFIG)); adminUnlocked=true; toast('Senha criada'); renderAdmin(); }
+    else if(v===CONFIG.pin){ adminUnlocked=true; renderAdmin(); }
+    else { toast('Senha incorreta'); }
+  };
+  $('pinInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('pinBtn').click();});
+}
+
+/* ============ View switch ============ */
+function render(){
+  if(view==='palpites')renderPalpites();
+  else if(view==='ranking')renderRanking();
+  else renderAdmin();
+}
+document.querySelectorAll('.tabs button').forEach(b=>{
+  b.onclick=()=>{
+    view=b.dataset.view;
+    document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x===b));
+    $('idbar').classList.toggle('hide', view!=='palpites');
+    if(view==='palpites') renderAuth();
+    render();
+  };
+});
+
+/* mantém os palpites em memória enquanto digita (não perde ao trocar de dia) */
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.classList.contains('sc') && t.dataset.id){
+    const id=t.dataset.id, side=t.dataset.side;
+    if(!currentPreds[id]) currentPreds[id]={h:null,a:null};
+    currentPreds[id][side]= t.value===''?null:Math.max(0,parseInt(t.value,10));
+  }
+});
+
+/* ============ Identidade: login por lista fechada + senha por pessoa ============ */
+function renderAuth(){
+  const bar=$('idbar');
+  if(authedSlug){
+    bar.innerHTML=`<div class="who" style="width:100%;justify-content:space-between">
+        <span>palpitando como <b>${currentName}</b></span>
+        <button class="btn ghost sm" id="logoutBtn">Sair</button>
+      </div>`;
+    $('logoutBtn').onclick=()=>{ authedSlug=''; currentName=''; currentSlug=''; currentPreds={}; renderAuth(); if(view==='palpites')renderPalpites(); };
+    return;
+  }
+  if(!ROSTER.length){
+    bar.innerHTML=`<div class="who" style="width:100%">Nenhum participante foi cadastrado ainda. O organizador precisa cadastrar a lista de nomes na aba <b>Organizador</b>.</div>`;
+    return;
+  }
+  bar.innerHTML=`
+    <div class="grow">
+      <label>Quem é você?</label>
+      <select class="field" id="whoSel">
+        <option value="">— Selecione seu nome —</option>
+        ${ROSTER.slice().sort((a,b)=>a.localeCompare(b)).map(n=>`<option value="${rosterSlug(n)}">${n}</option>`).join('')}
+      </select>
+    </div>
+    <div class="grow" id="passWrap" style="display:none">
+      <label id="passLbl">Sua senha</label>
+      <input class="field" id="passInput" type="password" inputmode="numeric" placeholder="Senha" autocomplete="off">
+    </div>
+    <button class="btn primary" id="authBtn" style="display:none">Entrar</button>`;
+  const sel=$('whoSel');
+  sel.onchange=async()=>{
+    const s=sel.value;
+    if(!s){ $('passWrap').style.display='none'; $('authBtn').style.display='none'; return; }
+    const rec=await getPerson(s);
+    const first=!rec || !rec.pass;
+    $('passWrap').style.display='';
+    $('authBtn').style.display='';
+    $('passLbl').textContent= first? 'Crie uma senha (primeiro acesso)' : 'Sua senha';
+    $('passInput').value='';
+    $('passInput').placeholder= first? 'Defina uma senha' : 'Senha';
+    $('authBtn').textContent= first? 'Cadastrar e entrar' : 'Entrar';
+  };
+  $('authBtn').onclick=doAuth;
+  bar.querySelector('#passInput')&&bar.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.activeElement.id==='passInput')doAuth();});
+}
+
+async function doAuth(){
+  const s=$('whoSel').value; if(!s){toast('Selecione seu nome');return;}
+  const pass=$('passInput').value.trim();
+  if(!pass){toast('Digite a senha');return;}
+  const name=ROSTER.find(n=>rosterSlug(n)===s);
+  const rec=await getPerson(s);
+  if(!rec || !rec.pass){
+    // primeiro acesso: cria registro com senha
+    await store.set('bolao:pred:'+s, JSON.stringify({name, pass, preds:(rec&&rec.preds)||{}, updated:Date.now()}));
+    authedSlug=s; currentName=name; currentSlug=s; currentPreds=(rec&&rec.preds)||{};
+    toast('Senha criada! Bons palpites, '+name);
+  } else if(rec.pass===pass){
+    authedSlug=s; currentName=name; currentSlug=s; currentPreds=rec.preds||{};
+    toast('Olá, '+name+'!');
+  } else { toast('Senha incorreta'); return; }
+  renderAuth();
+  if(view==='palpites') renderPalpites();
+}
+
+/* ============ Init ============ */
+(async function(){
+  await loadAll();
+  renderAuth();
+  render();
+})();
+</script>
