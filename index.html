@@ -351,14 +351,30 @@ const closeTime=m=>{
 };
 const shortRound=r=> r.replace(' Rodada','');
 
-function pointsFor(pred,res){
+/* Pontuação base (palpite x resultado), SEM o bônus de "sozinho":
+   +3 acerto do resultado (vencedor/empate) · +1 por cada equipe cujo nº de gols acertou */
+function baseScore(pred,res){
   if(!pred||!res) return null;
   if(pred.h===''||pred.a===''||res.h===''||res.a===''||pred.h==null||pred.a==null) return null;
   const ph=+pred.h, pa=+pred.a, rh=+res.h, ra=+res.a;
-  if(ph===rh && pa===ra) return 2;
-  if(outcome(ph,pa)===outcome(rh,ra)) return 1;
-  return 0;
+  let pts=0;
+  if(outcome(ph,pa)===outcome(rh,ra)) pts+=3; // acertou vencedor/perdedor ou empate
+  if(ph===rh) pts+=1;                          // acertou nº de gols do mandante
+  if(pa===ra) pts+=1;                          // acertou nº de gols do visitante
+  return pts;
 }
+const isExact=(pred,res)=> pred&&res&&pred.h!=null&&pred.a!=null&&res.h!==''&&res.a!=='' && +pred.h===+res.h && +pred.a===+res.a;
+/* compatibilidade: pointsFor continua existindo e retorna a pontuação base */
+function pointsFor(pred,res){ return baseScore(pred,res); }
+/* Conta quantos participantes cravaram o placar exato de um jogo (para o bônus de sozinho).
+   `allPeople` é a lista de objetos {preds}. */
+function countExact(matchId,res,allPeople){
+  if(!res||res.h===''||res.a==='') return 0;
+  let n=0;
+  for(const p of allPeople){ const pr=p.preds&&p.preds[matchId]; if(isExact(pr,res)) n++; }
+  return n;
+}
+const SOLO_BONUS=5;
 
 /* ============ Load ============ */
 async function loadAll(){
@@ -452,7 +468,7 @@ function renderPalpites(){
     return;
   }
   const note=document.createElement('div');note.className='note';
-  note.innerHTML='Escolha o dia e preencha os placares. <b>Acertar quem vence = 1 ponto · Placar exato = 2 pontos.</b> Os horários mostrados são <b>locais da cidade-sede</b> (a hora de Brasília aparece logo abaixo de cada jogo). Cada jogo fecha <b>30 minutos antes do apito inicial</b>. O que você digita já fica guardado ao trocar de dia — toque em <b>Salvar</b> para gravar.';
+  note.innerHTML='Escolha o dia e preencha os placares. <b>Pontuação por jogo:</b> +3 acertar o resultado (vencedor ou empate); +1 para cada equipe cujo nº de gols você acertar; +5 extras se você cravar o placar exato <b>sozinho</b>. Os horários são <b>locais da cidade-sede</b> (a hora de Brasília aparece abaixo de cada jogo). Cada jogo fecha <b>30 minutos antes do apito inicial</b>. Toque em <b>Salvar</b> para gravar.';
   c.appendChild(note);
 
   const days=flatDays();
@@ -516,10 +532,16 @@ function matchCardPalpite(m){
       <div class="team away"><span class="nm">${m.away}</span></div>
     </div>`;
   if(res){
-    const pts=pointsFor(pred,res);
+    const base=baseScore(pred,res);
+    const exact=isExact(pred,res);
     const tag=document.createElement('div');tag.className='result-tag';
-    let cls=pts===2?'ex':(pts===1?'ok':'no');
-    tag.innerHTML=`Resultado oficial: <b>${res.h} × ${res.a}</b>` + (pts!=null?`<span class="pts ${cls}">${pts===2?'+2 placar exato!':(pts===1?'+1 acertou':'0 pts')}</span>`:'');
+    let cls=exact?'ex':(base>=3?'ok':(base>0?'ok':'no'));
+    let label;
+    if(base==null) label='';
+    else if(exact) label=`+${base} placar exato${SOLO_BONUS?` (+${SOLO_BONUS} se sozinho)`:''}`;
+    else if(base>0) label=`+${base} pts`;
+    else label='0 pts';
+    tag.innerHTML=`Resultado oficial: <b>${res.h} × ${res.a}</b>` + (label?`<span class="pts ${cls}">${label}</span>`:'');
     el.appendChild(tag);
   }
   return el;
@@ -556,17 +578,29 @@ async function savePreds(){
 async function renderRanking(){
   const c=$('content'); c.innerHTML='<div class="empty">Calculando ranking…</div>';
   const l=await store.list('bolao:pred:');
-  const people=[];
+  const all=[];
   for(const k of (l.keys||[])){
     const g=await store.get(k); if(!g||!g.value)continue;
     let obj; try{obj=JSON.parse(g.value);}catch(e){continue;}
-    let total=0, exatos=0, certos=0, jogos=0;
+    all.push({name:obj.name, preds:obj.preds||{}});
+  }
+  // pré-calcula, para cada jogo com resultado, quantos cravaram o placar exato (bônus de sozinho)
+  const exactCount={};
+  for(const id in RESULTS){ exactCount[id]=countExact(id, RESULTS[id], all); }
+
+  const people=[];
+  for(const obj of all){
+    let total=0, exatos=0, resultados=0, solos=0, jogos=0;
     for(const id in obj.preds){
-      const pts=pointsFor(obj.preds[id], RESULTS[id]);
-      if(pts==null)continue;
-      jogos++; total+=pts; if(pts===2)exatos++; else if(pts===1)certos++;
+      const res=RESULTS[id]; const base=baseScore(obj.preds[id], res);
+      if(base==null) continue;
+      jogos++; total+=base;
+      if(isExact(obj.preds[id], res)){
+        exatos++;
+        if(exactCount[id]===1){ total+=SOLO_BONUS; solos++; } // acertou o placar exato SOZINHO
+      } else if(base>=3){ resultados++; }
     }
-    people.push({name:obj.name,total,exatos,certos,jogos});
+    people.push({name:obj.name,total,exatos,resultados,solos,jogos});
   }
   people.sort((a,b)=> b.total-a.total || b.exatos-a.exatos || a.name.localeCompare(b.name));
   c.innerHTML='';
@@ -578,7 +612,7 @@ async function renderRanking(){
     const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
     row.innerHTML=`
       <div class="pos">${medal}</div>
-      <div class="who2">${p.name}<small>${p.exatos} placar exato · ${p.certos} resultado · ${p.jogos} jogos pontuados</small></div>
+      <div class="who2">${p.name}<small>${p.exatos} placar exato${p.solos?` (${p.solos} sozinho)`:''} · ${p.jogos} jogos pontuados</small></div>
       <div class="score">${p.total}<small> pts</small></div>`;
     card.appendChild(row);
   });
@@ -611,13 +645,25 @@ async function renderAdminPalpites(c){
   // carrega todos os participantes
   const l=await store.list('bolao:pred:');
   const people=[];
+  const allForBonus=[];
   for(const k of (l.keys||[])){
     const g=await store.get(k); if(!g||!g.value)continue;
     let obj; try{obj=JSON.parse(g.value);}catch(e){continue;}
-    let total=0,count=0;
-    for(const id in obj.preds){ const pts=pointsFor(obj.preds[id],RESULTS[id]); if(pts!=null){total+=pts;} count++; }
-    people.push({key:k, name:obj.name, preds:obj.preds||{}, total, count, updated:obj.updated||0});
+    allForBonus.push({preds:obj.preds||{}});
+    people.push({key:k, name:obj.name, preds:obj.preds||{}, total:0, count:0, updated:obj.updated||0});
   }
+  // bônus de sozinho: quantos cravaram o placar exato em cada jogo
+  const exactCount={};
+  for(const id in RESULTS){ exactCount[id]=countExact(id, RESULTS[id], allForBonus); }
+  people.forEach(p=>{
+    let total=0,count=0;
+    for(const id in p.preds){
+      const base=baseScore(p.preds[id],RESULTS[id]); if(base==null) continue;
+      count++; total+=base;
+      if(isExact(p.preds[id],RESULTS[id]) && exactCount[id]===1) total+=SOLO_BONUS;
+    }
+    p.total=total; p.count=count;
+  });
   if(!people.length){
     const e=document.createElement('div');e.className='empty';
     e.textContent='Nenhum participante salvou palpites ainda.';
@@ -684,11 +730,12 @@ async function renderAdminPalpites(c){
         matches.forEach(m=>{
           any=true;
           const pr=p.preds[m.id], res=RESULTS[m.id];
-          const pts=pointsFor(pr,res);
+          const base=baseScore(pr,res);
+          const exact=isExact(pr,res);
           const row=document.createElement('div');row.className='pedit';
           let tag='';
-          if(res){ const cls=pts===2?'ex':(pts===1?'ok':'no');
-            tag=`<span class="pts ${cls}">${pts===2?'+2':(pts===1?'+1':'0')}</span>`; }
+          if(res && base!=null){ const cls=exact?'ex':(base>0?'ok':'no');
+            tag=`<span class="pts ${cls}">+${base}${exact?'★':''}</span>`; }
           row.innerHTML=`
             <span class="pe-home">${m.home}</span>
             <span class="pe-sc">
