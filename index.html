@@ -258,7 +258,7 @@ const RAW = `
 2|2026-06-19|12:00|Estados Unidos|Austrália|Seattle
 2|2026-06-19|18:00|Escócia|Marrocos|Boston
 2|2026-06-19|20:30|Brasil|Haiti|Filadélfia
-2|2026-06-20|20:00|Tunísia|Japão|Monterrey
+2|2026-06-20|22:00|Tunísia|Japão|Monterrey
 2|2026-06-20|12:00|Holanda|Suécia|Houston
 2|2026-06-20|16:00|Alemanha|Costa do Marfim|Toronto
 2|2026-06-20|19:00|Equador|Curaçao|Kansas City
@@ -393,7 +393,7 @@ async function loadAll(){
   });
   // Re-sincroniza a fase de grupos com a tabela oficial da FIFA (datas e horários LOCAIS).
   // Mantém resultados já lançados (guardados à parte) e jogos do mata-mata adicionados manualmente.
-  const SCHED_VER='fifa-local-1';
+  const SCHED_VER='fifa-local-2';
   const verRec=await store.get('bolao:schedver');
   if(!verRec || (verRec.value!==SCHED_VER)){
     const defs={}; buildDefaults().forEach(d=>defs[d.id]=d);
