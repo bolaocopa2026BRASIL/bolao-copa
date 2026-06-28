@@ -131,6 +131,13 @@
   .subtabs{display:flex;gap:8px;margin-bottom:12px}
   .subtab{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--muted);border-radius:12px;padding:11px 8px;font-weight:700;font-size:13.5px;cursor:pointer}
   .subtab.active{background:linear-gradient(160deg,var(--green),var(--green-d));color:#042018;border-color:transparent}
+  /* filtro de rodada/fase no organizador */
+  .round-filter{display:flex;flex-direction:column;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:11px 13px;margin:0 0 14px;box-shadow:var(--shadow);position:sticky;top:0;z-index:16}
+  .round-filter .rf-label{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;font-weight:800;color:var(--gold)}
+  .round-filter select.field{font-family:'Archivo';font-weight:700;cursor:pointer}
+  .rf-nav{display:flex;gap:8px;margin-top:2px}
+  .rf-nav button{flex:1;background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:9px 8px;font-weight:700;font-size:13px;cursor:pointer}
+  .rf-nav button:disabled{opacity:.4;cursor:default}
   .pview{display:grid;grid-template-columns:1fr auto 1fr auto auto;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:9px 11px;margin-bottom:7px;font-size:13px}
   .pview .pv-home{text-align:right;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .pview .pv-away{text-align:left;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -336,7 +343,7 @@ let MATCHES=[], RESULTS={}, view='palpites';
 let currentName='', currentSlug='', currentPreds={};
 let ROSTER=[]; // lista oficial de participantes (definida pelo organizador)
 let authedSlug=''; // pessoa autenticada na sessão atual
-let adminUnlocked=false, CONFIG={pin:null}, selectedDay=null, adminTab='resultados';
+let adminUnlocked=false, CONFIG={pin:null}, selectedDay=null, adminTab='resultados', adminRoundFilter=null;
 
 const slug=s=>s.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 const $=id=>document.getElementById(id);
@@ -841,10 +848,52 @@ async function renderAdminRoster(c){
 
 function renderAdminResultados(c){
   const note=document.createElement('div');note.className='note';
-  note.innerHTML='Lance aqui o <b>placar oficial</b> de cada jogo (o ranking atualiza sozinho). Você também pode <b>corrigir os times</b> e <b>adicionar jogos</b> do mata-mata.';
+  note.innerHTML='Lance aqui o <b>placar oficial</b> de cada jogo (o ranking atualiza sozinho). Você também pode <b>corrigir os times</b> e <b>adicionar jogos</b> do mata-mata. Use o seletor abaixo para escolher a <b>rodada/fase</b>.';
   c.appendChild(note);
 
-  grouped().forEach(R=>{
+  const groups=grouped();                 // [{rodada, days:[{dia,matches}]}] em ordem cronológica
+  const rounds=groups.map(R=>R.rodada);
+
+  // conta jogos lançados x total por fase
+  const counts={};
+  groups.forEach(R=>{ let tot=0,done=0; R.days.forEach(d=>d.matches.forEach(m=>{tot++; if(RESULTS[m.id]&&RESULTS[m.id].h!=='')done++;})); counts[R.rodada]={tot,done}; });
+
+  // define o filtro inicial: 1ª fase com jogo pendente; se filtro atual não existe mais, recalcula
+  if(adminRoundFilter===null || (adminRoundFilter!=='__all__' && !rounds.includes(adminRoundFilter))){
+    const pend=groups.find(R=>counts[R.rodada].done<counts[R.rodada].tot);
+    adminRoundFilter = pend ? pend.rodada : (rounds[0]||'__all__');
+  }
+
+  // ---- dropdown + navegação ----
+  const filt=document.createElement('div');filt.className='round-filter';
+  let opts=`<option value="__all__"${adminRoundFilter==='__all__'?' selected':''}>📋 Todas as rodadas/fases (${MATCHES.length} jogos)</option>`;
+  groups.forEach(R=>{
+    const c2=counts[R.rodada];
+    const mark = c2.tot? (c2.done===c2.tot?' ✓':` · ${c2.done}/${c2.tot}`) : '';
+    const lbl=R.rodada.replace(/</g,'&lt;').replace(/"/g,'&quot;');
+    opts+=`<option value="${lbl}"${adminRoundFilter===R.rodada?' selected':''}>${lbl}${mark}</option>`;
+  });
+  const idx=rounds.indexOf(adminRoundFilter);
+  const isAll=adminRoundFilter==='__all__';
+  filt.innerHTML=`
+    <label class="rf-label">Rodada / Fase</label>
+    <select class="field" id="adminRoundSel">${opts}</select>
+    <div class="rf-nav">
+      <button id="rfPrev"${(isAll||idx<=0)?' disabled':''}>◀ Anterior</button>
+      <button id="rfNext"${(isAll||idx<0||idx>=rounds.length-1)?' disabled':''}>Próxima ▶</button>
+    </div>`;
+  c.appendChild(filt);
+  $('adminRoundSel').onchange=e=>{ adminRoundFilter=e.target.value; renderAdmin(); };
+  const prev=$('rfPrev'), next=$('rfNext');
+  if(prev) prev.onclick=()=>{ if(idx>0){ adminRoundFilter=rounds[idx-1]; renderAdmin(); } };
+  if(next) next.onclick=()=>{ if(idx>=0&&idx<rounds.length-1){ adminRoundFilter=rounds[idx+1]; renderAdmin(); } };
+
+  // ---- jogos da(s) fase(s) selecionada(s) ----
+  const toShow = isAll ? groups : groups.filter(R=>R.rodada===adminRoundFilter);
+  if(!toShow.length){
+    const e=document.createElement('div');e.className='empty';e.innerHTML='Nenhum jogo nesta fase ainda.';c.appendChild(e);
+  }
+  toShow.forEach(R=>{
     const rh=document.createElement('div');rh.className='round-head';rh.textContent=R.rodada;c.appendChild(rh);
     R.days.forEach(Dy=>{
       const dh=document.createElement('div');dh.className='day-head';dh.textContent=Dy.dia;c.appendChild(dh);
@@ -939,6 +988,7 @@ async function addMatch(){
     home, away, city:city||'—'
   });
   await store.set('bolao:matches',JSON.stringify(MATCHES));
+  adminRoundFilter=rod;
   toast('Jogo adicionado'); renderAdmin();
 }
 
