@@ -922,6 +922,12 @@ function renderAdminResultados(c){
   danger.onclick=async()=>{ if(confirm('Restaurar todos os jogos para a tabela oficial padrão?')){ MATCHES=buildDefaults(); await store.set('bolao:matches',JSON.stringify(MATCHES)); toast('Tabela restaurada'); renderAdmin(); } };
   c.appendChild(danger);
 
+  const resetKO=document.createElement('button');
+  resetKO.className='small-link';resetKO.style.color='#c0392b';
+  resetKO.textContent='⚠️ Zerar ranking geral e recarregar mata-mata (16 avos + oitavas)';
+  resetKO.onclick=()=>resetForKnockout();
+  c.appendChild(resetKO);
+
   const lock=document.createElement('button');
   lock.className='small-link';lock.textContent='Sair do modo organizador';lock.style.display='block';
   lock.onclick=()=>{adminUnlocked=false;renderAdmin();};
@@ -953,13 +959,27 @@ function matchCardAdmin(m){
   return el;
 }
 
+/* Grava MATCHES de forma segura: relê o remoto antes de escrever e reincorpora
+   qualquer jogo que exista lá mas não na cópia local (evita que uma aba/dispositivo
+   desatualizado apague jogos criados por outra aba — a causa dos jogos que "somem"). */
+async function saveMatches(excludeIds){
+  const exclude = new Set(excludeIds||[]);
+  try{
+    const remote = await store.get('bolao:matches');
+    const remoteList = (remote && remote.value) ? JSON.parse(remote.value) : [];
+    const localIds = new Set(MATCHES.map(x=>x.id));
+    remoteList.forEach(rm=>{ if(!localIds.has(rm.id) && !exclude.has(rm.id)){ MATCHES.push(rm); localIds.add(rm.id); } });
+  }catch(e){ console.error('saveMatches: falha ao reler remoto, gravando mesmo assim', e); }
+  await store.set('bolao:matches', JSON.stringify(MATCHES));
+}
+
 async function saveResult(id){
   const h=document.querySelector(`[data-res="${id}"][data-side="h"]`).value;
   const a=document.querySelector(`[data-res="${id}"][data-side="a"]`).value;
   const home=document.querySelector(`[data-edit="${id}"][data-f="home"]`).value.trim();
   const away=document.querySelector(`[data-edit="${id}"][data-f="away"]`).value.trim();
   const m=MATCHES.find(x=>x.id===id);
-  if(m){ m.home=home||m.home; m.away=away||m.away; await store.set('bolao:matches',JSON.stringify(MATCHES)); }
+  if(m){ m.home=home||m.home; m.away=away||m.away; await saveMatches(); }
   if(h===''||a===''){ toast('Preencha os dois placares'); return; }
   RESULTS[id]={h:Math.max(0,parseInt(h,10)),a:Math.max(0,parseInt(a,10))};
   await store.set('bolao:results',JSON.stringify(RESULTS));
@@ -972,7 +992,7 @@ async function clearResult(id){
 async function delMatch(id){
   if(!confirm('Excluir este jogo?'))return;
   MATCHES=MATCHES.filter(x=>x.id!==id); delete RESULTS[id];
-  await store.set('bolao:matches',JSON.stringify(MATCHES));
+  await saveMatches([id]);
   await store.set('bolao:results',JSON.stringify(RESULTS));
   renderAdmin();
 }
@@ -987,9 +1007,62 @@ async function addMatch(){
     dia:`${dow}, ${D}/${M}`, diaSort:date, hora, kickoff:`${date}T${hora}:00-03:00`,
     home, away, city:city||'—'
   });
-  await store.set('bolao:matches',JSON.stringify(MATCHES));
+  await saveMatches();
   adminRoundFilter=rod;
   toast('Jogo adicionado'); renderAdmin();
+}
+
+/* ====== Reset para fase de mata-mata (gerado em 03/07/2026 com dados oficiais até essa data) ======
+   16 avos: os 16 confrontos, com resultado já preenchido nos 13 jogos encerrados até 03/07.
+   Oitavas: os 6 confrontos já definidos (04 a 06/07). Os 2 restantes (dependem de Argentina x Cabo
+   Verde, Austrália x Egito e Colômbia x Gana, ainda não disputados) ficam de fora — adicione-os
+   manualmente pelo formulário "Adicionar jogo" assim que os classificados forem conhecidos. */
+const KNOCKOUT_MATCHES=[
+  {id:"kn32-01",rodada:"16 avos de final",ord:4,dia:"Dom, 28/06",diaSort:"2026-06-28",hora:"16:00",kickoff:"2026-06-28T16:00:00-03:00",home:"África do Sul",away:"Canadá",city:"Sede a confirmar"},
+  {id:"kn32-02",rodada:"16 avos de final",ord:4,dia:"Seg, 29/06",diaSort:"2026-06-29",hora:"14:00",kickoff:"2026-06-29T14:00:00-03:00",home:"Brasil",away:"Japão",city:"Houston"},
+  {id:"kn32-03",rodada:"16 avos de final",ord:4,dia:"Seg, 29/06",diaSort:"2026-06-29",hora:"17:30",kickoff:"2026-06-29T17:30:00-03:00",home:"Alemanha",away:"Paraguai",city:"Sede a confirmar"},
+  {id:"kn32-04",rodada:"16 avos de final",ord:4,dia:"Seg, 29/06",diaSort:"2026-06-29",hora:"22:00",kickoff:"2026-06-29T22:00:00-03:00",home:"Holanda",away:"Marrocos",city:"Sede a confirmar"},
+  {id:"kn32-05",rodada:"16 avos de final",ord:4,dia:"Ter, 30/06",diaSort:"2026-06-30",hora:"14:00",kickoff:"2026-06-30T14:00:00-03:00",home:"Costa do Marfim",away:"Noruega",city:"Sede a confirmar"},
+  {id:"kn32-06",rodada:"16 avos de final",ord:4,dia:"Ter, 30/06",diaSort:"2026-06-30",hora:"18:00",kickoff:"2026-06-30T18:00:00-03:00",home:"França",away:"Suécia",city:"Sede a confirmar"},
+  {id:"kn32-07",rodada:"16 avos de final",ord:4,dia:"Ter, 30/06",diaSort:"2026-06-30",hora:"22:00",kickoff:"2026-06-30T22:00:00-03:00",home:"México",away:"Equador",city:"Cidade do México"},
+  {id:"kn32-08",rodada:"16 avos de final",ord:4,dia:"Qua, 01/07",diaSort:"2026-07-01",hora:"13:00",kickoff:"2026-07-01T13:00:00-03:00",home:"Inglaterra",away:"RD Congo",city:"Sede a confirmar"},
+  {id:"kn32-09",rodada:"16 avos de final",ord:4,dia:"Qua, 01/07",diaSort:"2026-07-01",hora:"17:00",kickoff:"2026-07-01T17:00:00-03:00",home:"Bélgica",away:"Senegal",city:"Sede a confirmar"},
+  {id:"kn32-10",rodada:"16 avos de final",ord:4,dia:"Qua, 01/07",diaSort:"2026-07-01",hora:"21:00",kickoff:"2026-07-01T21:00:00-03:00",home:"Estados Unidos",away:"Bósnia e Herzegovina",city:"Sede a confirmar"},
+  {id:"kn32-11",rodada:"16 avos de final",ord:4,dia:"Qui, 02/07",diaSort:"2026-07-02",hora:"16:00",kickoff:"2026-07-02T16:00:00-03:00",home:"Espanha",away:"Áustria",city:"Sede a confirmar"},
+  {id:"kn32-12",rodada:"16 avos de final",ord:4,dia:"Qui, 02/07",diaSort:"2026-07-02",hora:"20:00",kickoff:"2026-07-02T20:00:00-03:00",home:"Portugal",away:"Croácia",city:"Sede a confirmar"},
+  {id:"kn32-13",rodada:"16 avos de final",ord:4,dia:"Sex, 03/07",diaSort:"2026-07-03",hora:"00:00",kickoff:"2026-07-03T00:00:00-03:00",home:"Suíça",away:"Argélia",city:"Vancouver"},
+  {id:"kn32-14",rodada:"16 avos de final",ord:4,dia:"Sex, 03/07",diaSort:"2026-07-03",hora:"15:00",kickoff:"2026-07-03T15:00:00-03:00",home:"Austrália",away:"Egito",city:"Sede a confirmar"},
+  {id:"kn32-15",rodada:"16 avos de final",ord:4,dia:"Sex, 03/07",diaSort:"2026-07-03",hora:"19:00",kickoff:"2026-07-03T19:00:00-03:00",home:"Argentina",away:"Cabo Verde",city:"Sede a confirmar"},
+  {id:"kn32-16",rodada:"16 avos de final",ord:4,dia:"Sex, 03/07",diaSort:"2026-07-03",hora:"22:30",kickoff:"2026-07-03T22:30:00-03:00",home:"Colômbia",away:"Gana",city:"Sede a confirmar"},
+  {id:"kn16-01",rodada:"Oitavas de final",ord:5,dia:"Sáb, 04/07",diaSort:"2026-07-04",hora:"14:00",kickoff:"2026-07-04T14:00:00-03:00",home:"Canadá",away:"Marrocos",city:"Sede a confirmar"},
+  {id:"kn16-02",rodada:"Oitavas de final",ord:5,dia:"Sáb, 04/07",diaSort:"2026-07-04",hora:"18:00",kickoff:"2026-07-04T18:00:00-03:00",home:"Paraguai",away:"França",city:"Sede a confirmar"},
+  {id:"kn16-03",rodada:"Oitavas de final",ord:5,dia:"Dom, 05/07",diaSort:"2026-07-05",hora:"17:00",kickoff:"2026-07-05T17:00:00-03:00",home:"Brasil",away:"Noruega",city:"Sede a confirmar"},
+  {id:"kn16-04",rodada:"Oitavas de final",ord:5,dia:"Dom, 05/07",diaSort:"2026-07-05",hora:"21:00",kickoff:"2026-07-05T21:00:00-03:00",home:"México",away:"Inglaterra",city:"Sede a confirmar"},
+  {id:"kn16-05",rodada:"Oitavas de final",ord:5,dia:"Seg, 06/07",diaSort:"2026-07-06",hora:"16:00",kickoff:"2026-07-06T16:00:00-03:00",home:"Portugal",away:"Espanha",city:"Sede a confirmar"},
+  {id:"kn16-06",rodada:"Oitavas de final",ord:5,dia:"Seg, 06/07",diaSort:"2026-07-06",hora:"21:00",kickoff:"2026-07-06T21:00:00-03:00",home:"Estados Unidos",away:"Bélgica",city:"Sede a confirmar"}
+];
+const KNOCKOUT_RESULTS={
+  "kn32-01":{h:0,a:1}, "kn32-02":{h:2,a:1}, "kn32-03":{h:1,a:1}, "kn32-04":{h:1,a:1},
+  "kn32-05":{h:1,a:2}, "kn32-06":{h:3,a:0}, "kn32-07":{h:2,a:0}, "kn32-08":{h:2,a:1},
+  "kn32-09":{h:3,a:2}, "kn32-10":{h:2,a:0}, "kn32-11":{h:3,a:0}, "kn32-12":{h:2,a:1},
+  "kn32-13":{h:2,a:0}
+};
+async function resetForKnockout(){
+  if(!confirm('Isso vai ZERAR o ranking geral (inclusive pontos da fase de grupos) e substituir os jogos de mata-mata pela tabela oficial de 16 avos + oitavas. As pessoas cadastradas e os palpites já enviados NÃO são apagados. Confirma?')) return;
+  const digit = prompt('Para confirmar, digite ZERAR em maiúsculas:');
+  if(digit!=='ZERAR'){ toast('Cancelado — texto não confere'); return; }
+  // 1) remove qualquer jogo de mata-mata já cadastrado (mantém só a fase de grupos: ord 1,2,3)
+  MATCHES = MATCHES.filter(m=>m.ord<=3);
+  // 2) insere a tabela oficial de 16 avos + oitavas
+  MATCHES = MATCHES.concat(KNOCKOUT_MATCHES);
+  await store.set('bolao:matches', JSON.stringify(MATCHES));
+  // 3) zera o ranking geral (todos os resultados, inclusive fase de grupos) e repõe só os 13 jogos
+  //    de 16 avos já encerrados até 03/07/2026
+  RESULTS = {...KNOCKOUT_RESULTS};
+  await store.set('bolao:results', JSON.stringify(RESULTS));
+  toast('Ranking zerado e mata-mata recarregado');
+  adminRoundFilter='16 avos de final';
+  renderAdmin();
 }
 
 async function renderPinGate(c){
