@@ -918,9 +918,22 @@ function renderAdminResultados(c){
   $('addMatchBtn').onclick=addMatch;
 
   const danger=document.createElement('button');
-  danger.className='small-link';danger.textContent='Restaurar tabela oficial padrão (apaga edições de jogos, mantém palpites)';
-  danger.onclick=async()=>{ if(confirm('Restaurar todos os jogos para a tabela oficial padrão?')){ MATCHES=buildDefaults(); await store.set('bolao:matches',JSON.stringify(MATCHES)); toast('Tabela restaurada'); renderAdmin(); } };
+  danger.className='small-link';danger.textContent='Restaurar fase de grupos (mantém mata-mata e palpites)';
+  danger.onclick=async()=>{
+    if(!confirm('Restaurar APENAS os jogos da fase de grupos para a tabela oficial? Os jogos de mata-mata (16 avos, oitavas etc.) e todos os palpites serão MANTIDOS.'))return;
+    if(prompt('Para confirmar, digite RESTAURAR em maiúsculas:')!=='RESTAURAR'){ toast('Cancelado — texto não confere'); return; }
+    const kn=MATCHES.filter(m=>m.ord>3);
+    MATCHES=[...buildDefaults(), ...kn];
+    await saveMatches();
+    toast('Fase de grupos restaurada'); renderAdmin();
+  };
   c.appendChild(danger);
+
+  const religar=document.createElement('button');
+  religar.className='btn ghost full';religar.style.margin='0 0 8px';
+  religar.innerHTML='🛟 Religar jogos do mata-mata (recupera sem zerar ranking)';
+  religar.onclick=religarKnockout;
+  c.appendChild(religar);
 
   const resetKO=document.createElement('button');
   resetKO.className='small-link';resetKO.style.color='#c0392b';
@@ -1039,7 +1052,9 @@ const KNOCKOUT_MATCHES=[
   {id:"kn16-03",rodada:"Oitavas de final",ord:5,dia:"Dom, 05/07",diaSort:"2026-07-05",hora:"17:00",kickoff:"2026-07-05T17:00:00-03:00",home:"Brasil",away:"Noruega",city:"Sede a confirmar"},
   {id:"kn16-04",rodada:"Oitavas de final",ord:5,dia:"Dom, 05/07",diaSort:"2026-07-05",hora:"21:00",kickoff:"2026-07-05T21:00:00-03:00",home:"México",away:"Inglaterra",city:"Sede a confirmar"},
   {id:"kn16-05",rodada:"Oitavas de final",ord:5,dia:"Seg, 06/07",diaSort:"2026-07-06",hora:"16:00",kickoff:"2026-07-06T16:00:00-03:00",home:"Portugal",away:"Espanha",city:"Sede a confirmar"},
-  {id:"kn16-06",rodada:"Oitavas de final",ord:5,dia:"Seg, 06/07",diaSort:"2026-07-06",hora:"21:00",kickoff:"2026-07-06T21:00:00-03:00",home:"Estados Unidos",away:"Bélgica",city:"Sede a confirmar"}
+  {id:"kn16-06",rodada:"Oitavas de final",ord:5,dia:"Seg, 06/07",diaSort:"2026-07-06",hora:"21:00",kickoff:"2026-07-06T21:00:00-03:00",home:"Estados Unidos",away:"Bélgica",city:"Sede a confirmar"},
+  {id:"kn16-07",rodada:"Oitavas de final",ord:5,dia:"Ter, 07/07",diaSort:"2026-07-07",hora:"13:00",kickoff:"2026-07-07T13:00:00-03:00",home:"Argentina",away:"Egito",city:"Sede a confirmar"},
+  {id:"kn16-08",rodada:"Oitavas de final",ord:5,dia:"Ter, 07/07",diaSort:"2026-07-07",hora:"17:00",kickoff:"2026-07-07T17:00:00-03:00",home:"Suíça",away:"Colômbia",city:"Sede a confirmar"}
 ];
 const KNOCKOUT_RESULTS={
   "kn32-01":{h:0,a:1}, "kn32-02":{h:2,a:1}, "kn32-03":{h:1,a:1}, "kn32-04":{h:1,a:1},
@@ -1047,6 +1062,22 @@ const KNOCKOUT_RESULTS={
   "kn32-09":{h:3,a:2}, "kn32-10":{h:2,a:0}, "kn32-11":{h:3,a:0}, "kn32-12":{h:2,a:1},
   "kn32-13":{h:2,a:0}
 };
+/* Religa o mata-mata: readiciona qualquer jogo de 16 avos/oitavas que tenha
+   sumido da lista, REUSANDO os ids canônicos. Não zera ranking, não mexe em
+   resultados nem palpites — jogos que já existem são preservados como estão. */
+async function religarKnockout(){
+  const have=new Set(MATCHES.map(m=>m.id));
+  const faltando=KNOCKOUT_MATCHES.filter(k=>!have.has(k.id));
+  if(!faltando.length){ toast('Nenhum jogo de mata-mata está faltando'); return; }
+  const nomes=faltando.map(k=>`${k.home} × ${k.away}`).join('\n');
+  if(!confirm(`Vou readicionar ${faltando.length} jogo(s) que sumiram (palpites e placares religam sozinhos):\n\n${nomes}`)) return;
+  MATCHES=MATCHES.concat(faltando.map(k=>({...k})));
+  await saveMatches();
+  toast(`${faltando.length} jogo(s) religado(s)`);
+  adminRoundFilter='Oitavas de final';
+  renderAdmin();
+}
+
 async function resetForKnockout(){
   if(!confirm('Isso vai ZERAR o ranking geral (inclusive pontos da fase de grupos) e substituir os jogos de mata-mata pela tabela oficial de 16 avos + oitavas. As pessoas cadastradas e os palpites já enviados NÃO são apagados. Confirma?')) return;
   const digit = prompt('Para confirmar, digite ZERAR em maiúsculas:');
